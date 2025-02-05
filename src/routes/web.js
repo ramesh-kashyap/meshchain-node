@@ -1,18 +1,16 @@
 import express from 'express';
-let router = express.Router();
-const authMiddleware = require("../middleware/authMiddleware"); // JWT Authentication
-const AuthController = require("../controllers/AuthController");
+import authMiddleware from '../middleware/authMiddleware.js'; // ✅ Correct Import Path
+import AuthController from '../controllers/AuthController.js'; // ✅ Ensure .js extension
+
+const router = express.Router();
 
 const initWebRouter = (app) => {
-    // page account
+    // Account Routes
     router.post("/register", AuthController.register);
     router.post("/login", AuthController.login);
     router.post("/logout", AuthController.logout);
 
-    
-    return app.use('/', router); 
-}
-
-module.exports = {
-    initWebRouter,
+    return app.use('/', router);
 };
+
+export { initWebRouter }; // ✅ Correct Export

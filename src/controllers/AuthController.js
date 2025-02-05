@@ -1,6 +1,7 @@
-import db from "../config/connectDB";
+import connectDB from "./config/connectDB.js";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+import connectDB from "../config/connectDB.js";
 
 
 // Register User Function
@@ -13,7 +14,7 @@ const register = async (req, res) => {
         }
 
         // Check if user already exists
-        const [existingUser] = await db.promise().query(
+        const [existingUser] = await connectDB.promise().query(
             "SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]
         );
         if (existingUser.length > 0) {
@@ -21,7 +22,7 @@ const register = async (req, res) => {
         }
 
         // Check if sponsor exists
-        const [sponsorUser] = await db.promise().query(
+        const [sponsorUser] = await connectDB.promise().query(
             "SELECT * FROM users WHERE username = ?", [sponsor]
         );
         if (sponsorUser.length === 0) {
@@ -37,7 +38,7 @@ const register = async (req, res) => {
         const hashedTPassword = await bcrypt.hash(tpassword, 10);
 
         // Get parent ID
-        const [lastUser] = await db.promise().query("SELECT id FROM users ORDER BY id DESC LIMIT 1");
+        const [lastUser] = await connectDB.promise().query("SELECT id FROM users ORDER BY id DESC LIMIT 1");
         const parentId = lastUser.length > 0 ? lastUser[0].id : null;
 
         // User data
@@ -56,7 +57,7 @@ const register = async (req, res) => {
         };
 
         // Insert new user
-        await db.promise().query("INSERT INTO users SET ?", newUser);
+        await connectDB.promise().query("INSERT INTO users SET ?", newUser);
 
         return res.status(201).json({ message: "User registered successfully!", username });
 
@@ -82,7 +83,7 @@ const login = async (req, res) => {
         }
 
         // Check if user exists
-        const [user] = await db.promise().query(
+        const [user] = await connectDB.promise().query(
             "SELECT * FROM users WHERE username = ?", [username]
         );
 
