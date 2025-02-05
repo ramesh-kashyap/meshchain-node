@@ -8,7 +8,15 @@ const initWebRouter = (app) => {
     router.post("/login", AuthController.login);
     router.post("/logout", AuthController.logout);
 
-    return app.use('/', router);
+    
+    return app.use('/', router); 
+}
+
+
+
+
+module.exports = {
+    initWebRouter,
 };
 
 export { initWebRouter }; // ✅ Correct Export
