@@ -1,11 +1,10 @@
 {
   "name": "secure-node-project",
   "version": "1.0.0",
-  "description": "A secure Node.js project with MySQL and React.js",
+  "type": "module", 
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

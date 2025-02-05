@@ -1,15 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const mysql = require('mysql2/promise');
-const winston = require('winston');
-import routes from './routes/web';
-
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import mysql from 'mysql2/promise';
+import winston from 'winston';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
 app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || '*', credentials: true }));
@@ -27,15 +24,18 @@ const logger = winston.createLogger({
     ]
 });
 
+// Initialize Web Routes
+const initWebRouter = (app) => {
+    // Define your routes here
+    app.get('/api/example', (req, res) => {
+        res.send({ message: 'This is an example route' });
+    });
 
-// Init Web Routes
-routes.initWebRouter(app);
+    // You can add more routes as needed
+};
 
-
-
-app.get('/', (req, res) => {
-    res.send({ message: 'Secure Node.js API with MySQL' });
-});
+// Export the function as the default export
+export default initWebRouter;
 
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);

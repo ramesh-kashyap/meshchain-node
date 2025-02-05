@@ -1,4 +1,6 @@
 import express from 'express';
+webRoutes.initWebRouter(app);
+
 let router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware"); // JWT Authentication
 const AuthController = require("../controllers/AuthController");
