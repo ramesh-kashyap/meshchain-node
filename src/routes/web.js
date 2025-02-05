@@ -1,8 +1,6 @@
-import express from 'express';
-import authMiddleware from '../middleware/authMiddleware.js'; // ✅ Correct Import Path
-import AuthController from '../controllers/AuthController.js'; // ✅ Ensure .js extension
-
-const router = express.Router();
+const express = require('express');
+let router = express.Router();
+const AuthController = require("../controllers/AuthController");
 
 const initWebRouter = (app) => {
     // Account Routes

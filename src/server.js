@@ -5,9 +5,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const winston = require('winston');
-import routes from './routes/web';
-
-
+const routes = require('./routes/web');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
