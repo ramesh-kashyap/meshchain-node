@@ -1,6 +1,5 @@
-import express from 'express';
+const express = require('express');
 let router = express.Router();
-const authMiddleware = require("../middleware/authMiddleware"); // JWT Authentication
 const AuthController = require("../controllers/AuthController");
 
 const initWebRouter = (app) => {

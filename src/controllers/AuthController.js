@@ -1,5 +1,5 @@
-import db from "../config/connectDB";
-const bcrypt = require("bcryptjs");
+const db = require('../config/connectDB'); // Adjust path if needed
+// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 
@@ -120,7 +120,7 @@ const logout = async (req, res) => {
     }
 };
 
-// module.exports = { logout };
+
 
 module.exports = { login, register, logout };
 
