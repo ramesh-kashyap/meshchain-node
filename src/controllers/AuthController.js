@@ -1,12 +1,12 @@
 const db = require('../config/connectDB'); // Adjust path if needed
-// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-import connectDB from "../config/connectDB.js";
+const bcrypt = require("bcryptjs");
 
 
 // Register User Function
 const register = async (req, res) => {
-    try {
+    console.log(req.body);
+    try {        
         const { name, phone, email, password, sponsor } = req.body;
 
         if (!name || !phone || !email || !password || !sponsor) {
@@ -14,7 +14,7 @@ const register = async (req, res) => {
         }
 
         // Check if user already exists
-        const [existingUser] = await connectDB.promise().query(
+        const [existingUser] = await db.execute(
             "SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]
         );
         if (existingUser.length > 0) {
@@ -22,7 +22,7 @@ const register = async (req, res) => {
         }
 
         // Check if sponsor exists
-        const [sponsorUser] = await connectDB.promise().query(
+        const [sponsorUser] = await db.execute(
             "SELECT * FROM users WHERE username = ?", [sponsor]
         );
         if (sponsorUser.length === 0) {
@@ -38,7 +38,7 @@ const register = async (req, res) => {
         const hashedTPassword = await bcrypt.hash(tpassword, 10);
 
         // Get parent ID
-        const [lastUser] = await connectDB.promise().query("SELECT id FROM users ORDER BY id DESC LIMIT 1");
+        const [lastUser] = await db.execute("SELECT id FROM users ORDER BY id DESC LIMIT 1");
         const parentId = lastUser.length > 0 ? lastUser[0].id : null;
 
         // User data
@@ -57,7 +57,7 @@ const register = async (req, res) => {
         };
 
         // Insert new user
-        await connectDB.promise().query("INSERT INTO users SET ?", newUser);
+        await db.execute("INSERT INTO users SET ?", newUser);
 
         return res.status(201).json({ message: "User registered successfully!", username });
 
@@ -76,6 +76,7 @@ const register = async (req, res) => {
 // Login User Function
 const login = async (req, res) => {
     try {
+        
         const { username, password } = req.body;
 
         if (!username || !password) {
@@ -83,7 +84,7 @@ const login = async (req, res) => {
         }
 
         // Check if user exists
-        const [user] = await connectDB.promise().query(
+        const [user] = await db.execute(
             "SELECT * FROM users WHERE username = ?", [username]
         );
 
@@ -109,6 +110,9 @@ const login = async (req, res) => {
         return res.status(500).json({ error: "Server error", details: error.message });
     }
 };
+
+
+
 
 
 

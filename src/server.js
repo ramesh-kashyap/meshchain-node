@@ -8,6 +8,10 @@ const winston = require('winston');
 const routes = require('./routes/web');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+
 
 app.use(helmet());
 app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || '*', credentials: true }));
