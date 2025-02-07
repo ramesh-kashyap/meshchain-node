@@ -74,9 +74,9 @@ const register = async (req, res) => {
 
 
 // Login User Function
+
 const login = async (req, res) => {
     try {
-        
         const { username, password } = req.body;
 
         if (!username || !password) {
@@ -84,9 +84,7 @@ const login = async (req, res) => {
         }
 
         // Check if user exists
-        const [user] = await db.execute(
-            "SELECT * FROM users WHERE username = ?", [username]
-        );
+        const [user] = await db.execute("SELECT * FROM users WHERE username = ?", [username]);
 
         if (user.length === 0) {
             return res.status(400).json({ error: "User not found!" });
@@ -100,17 +98,23 @@ const login = async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials!" });
         }
 
-        // Generate JWT token
-        const token = jwt.sign({ id: userData.id, username: userData.username }, "your_secret_key", { expiresIn: "1h" });
+        // Generate JWT token (Secret key should be in .env file)
+        const token = jwt.sign(
+            { id: userData.id, username: userData.username },
+            process.env.JWT_SECRET || "your_secret_key",  // Secret key from environment variables
+            { expiresIn: "1h" }
+        );
 
-        return res.status(200).json({ message: "Login successful!", username: userData.username, token });
+        return res.status(200).json({
+            message: "Login successful!",
+            token,  // Return token instead of storing username in localStorage
+        });
 
     } catch (error) {
         console.error("Error:", error.message);
         return res.status(500).json({ error: "Server error", details: error.message });
     }
 };
-
 
 
 
