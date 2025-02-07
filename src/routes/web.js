@@ -3,6 +3,17 @@ let router = express.Router();
 const AuthController = require("../controllers/AuthController");
 const TelegramController = require("../controllers/TelegramController");
 
+const passport = require('passport');
+
+
+const googleController = require('../controllers/googleController');
+
+const authController = require('../controllers/AuthController');
+
+router.post('/google', googleController.verifyGoogleToken);
+router.post('/register', authController.register);
+
+// Mount the router on /api/auth so that /register becomes /api/auth/register
 const initWebRouter = (app) => {
     // page account
     router.post("/register", AuthController.register);
@@ -19,3 +30,8 @@ const initWebRouter = (app) => {
 module.exports = {
     initWebRouter,
 };
+    app.use('/api/auth', router);
+  };
+
+  module.exports = initWebRouter;
+
