@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const AuthController = require("../controllers/AuthController");
 const IncomeController = require("../controllers/incomeController");
+const authMiddleware = require("../middleware/authMiddleware"); // JWT Auth Middleware
 
 const initWebRouter = (app) => {
     // page account
@@ -9,6 +10,7 @@ const initWebRouter = (app) => {
     router.post("/login", AuthController.login);
     router.post("/logout", AuthController.logout);
     router.get("/income", IncomeController.income);
+    router.get("/income", authMiddleware, IncomeController.getDirectIncome);
 
 
     
