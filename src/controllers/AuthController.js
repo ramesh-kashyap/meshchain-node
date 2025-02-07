@@ -1,5 +1,5 @@
-const db = require('../config/connectDB'); // Adjust path if needed
-// const bcrypt = require("bcryptjs");
+const db = require("../config/connectDB");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 
@@ -7,13 +7,13 @@ const jwt = require("jsonwebtoken");
 const register = async (req, res) => {
     try {
         const { name, phone, email, password, sponsor } = req.body;
-
+        
         if (!name || !phone || !email || !password || !sponsor) {
             return res.status(400).json({ error: "All fields are required!" });
         }
 
         // Check if user already exists
-        const [existingUser] = await db.promise().query(
+        const [existingUser] = await db.execute(
             "SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]
         );
         if (existingUser.length > 0) {
@@ -21,7 +21,7 @@ const register = async (req, res) => {
         }
 
         // Check if sponsor exists
-        const [sponsorUser] = await db.promise().query(
+        const [sponsorUser] = await db.execute(
             "SELECT * FROM users WHERE username = ?", [sponsor]
         );
         if (sponsorUser.length === 0) {
@@ -37,10 +37,15 @@ const register = async (req, res) => {
         const hashedTPassword = await bcrypt.hash(tpassword, 10);
 
         // Get parent ID
-        const [lastUser] = await db.promise().query("SELECT id FROM users ORDER BY id DESC LIMIT 1");
+        const [lastUser] = await db.execute("SELECT id FROM users ORDER BY id DESC LIMIT 1");
         const parentId = lastUser.length > 0 ? lastUser[0].id : null;
 
-        // User data
+        // Provide a default for sponsor level if it's undefined or null
+        const sponsorLevel = (sponsorUser[0].level !== undefined && sponsorUser[0].level !== null)
+            ? sponsorUser[0].level
+            : 0;
+
+        // Construct new user object
         const newUser = {
             name,
             phone,
@@ -51,12 +56,15 @@ const register = async (req, res) => {
             PSR: password,
             TPSR: tpassword,
             sponsor: sponsorUser[0].id,
-            level: sponsorUser[0].level + 1,
+            level: sponsorLevel + 1,  // Default to 0 if sponsor level is not defined, then add 1
             ParentId: parentId
         };
 
-        // Insert new user
-        await db.promise().query("INSERT INTO users SET ?", newUser);
+        // Optional: Log newUser for debugging (avoid logging sensitive info in production)
+        console.log("New User Data:", newUser);
+
+        // Insert new user into the database
+        await db.execute("INSERT INTO users SET ?", newUser);
 
         return res.status(201).json({ message: "User registered successfully!", username });
 
@@ -120,7 +128,7 @@ const logout = async (req, res) => {
     }
 };
 
-
+// module.exports = { logout };
 
 module.exports = { login, register, logout };
 
