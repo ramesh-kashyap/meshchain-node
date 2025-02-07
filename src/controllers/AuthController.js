@@ -1,7 +1,6 @@
 const db = require("../config/connectDB");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 
 // Register User Function
