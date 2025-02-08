@@ -13,7 +13,6 @@ const register = async (req, res) => {
             return res.status(400).json({ error: "All fields are required!" });
         }
 
-        // Check if user already exists
         const [existingUser] = await db.execute(
             "SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]
         );
@@ -21,7 +20,6 @@ const register = async (req, res) => {
             return res.status(400).json({ error: "Email or Phone already exists!" });
         }
 
-        // Check if sponsor exists
         const [sponsorUser] = await db.execute(
             "SELECT * FROM users WHERE username = ?", [sponsor]
         );
@@ -29,24 +27,19 @@ const register = async (req, res) => {
             return res.status(400).json({ error: "Sponsor does not exist!" });
         }
 
-        // Generate username & transaction password
         const username = Math.random().toString(36).substring(2, 10);
         const tpassword = Math.random().toString(36).substring(2, 8);
 
-        // Hash passwords
         const hashedPassword = await bcrypt.hash(password, 10);
         const hashedTPassword = await bcrypt.hash(tpassword, 10);
 
-        // Get parent ID
         const [lastUser] = await db.execute("SELECT id FROM users ORDER BY id DESC LIMIT 1");
         const parentId = lastUser.length > 0 ? lastUser[0].id : null;
 
-        // Provide a default for sponsor level if it's undefined or null
         const sponsorLevel = (sponsorUser[0].level !== undefined && sponsorUser[0].level !== null)
             ? sponsorUser[0].level
             : 0;
 
-        // Construct new user object
         const newUser = {
             name,
             phone,
@@ -61,10 +54,8 @@ const register = async (req, res) => {
             ParentId: parentId
         };
 
-        // Optional: Log newUser for debugging (avoid logging sensitive info in production)
         console.log("New User Data:", newUser);
 
-        // Insert new user into the database
         await db.execute("INSERT INTO users SET ?", newUser);
 
         return res.status(201).json({ message: "User registered successfully!", username });
@@ -77,7 +68,6 @@ const register = async (req, res) => {
 
 
 
-// Export function
 
 
 

@@ -1,20 +1,27 @@
 const jwt = require("jsonwebtoken");
 
-// Middleware for JWT Authentication
 const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1]; // Get token from headers
+  console.log("Request Headers:", req.headers); // 🔍 Check headers received
 
-    if (!token) {
-        return res.status(401).json({ error: "Access Denied. No token provided!" });
-    }
+  const authHeader = req.headers["authorization"];
+  console.log("Received Authorization Header:", authHeader); // ✅ Debugging token in middleware
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_secret_key");
-        req.user = decoded; // Store user data in request object
-        next(); // Continue to the next middleware
-    } catch (error) {
-        return res.status(403).json({ error: "Invalid or expired token!" });
-    }
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Access Denied. No token provided!" });
+  }
+
+  const token = authHeader.split(" ")[1]; // ✅ Extract token part
+  console.log("Extracted Token:", token); // ✅ Check extracted token
+
+  try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_secret_key");
+      req.user = decoded;
+      console.log("Decoded Token Data:", req.user); // ✅ Check decoded user data
+      next();
+  } catch (error) {
+      return res.status(403).json({ error: "Invalid or expired token!" });
+  }
 };
+
 
 module.exports = verifyToken;
