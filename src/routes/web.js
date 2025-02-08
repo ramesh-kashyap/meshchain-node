@@ -14,6 +14,8 @@ router.post('/google', googleController.verifyGoogleToken);
 router.post('/register', AuthController.register);
 router.get("/direct-income", authMiddleware, IncomeController.getDirectIncome);
 router.get("/level-income", authMiddleware, IncomeController.getLevelIncome);
+router.get("/Roi-income", authMiddleware, IncomeController.getRoiIncome);
+
 
 // Mount the router on /api/auth so that /register becomes /api/auth/register
 const initWebRouter = (app) => {
