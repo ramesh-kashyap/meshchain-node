@@ -16,6 +16,7 @@ router.get("/level-income", authMiddleware, IncomeController.getLevelIncome);
 router.get("/Roi-income", authMiddleware, IncomeController.getRoiIncome);
 
 
+
 // Mount the router on /api/auth so that /register becomes /api/auth/register
 const initWebRouter = (app) => {
     // page account
