@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const AuthController = require("../controllers/AuthController");
 const IncomeController = require("../controllers/incomeController");
+
 const authMiddleware = require("../middleware/authMiddleware"); // JWT Auth Middleware
 
 const passport = require('passport');
@@ -15,6 +16,7 @@ router.post('/register', AuthController.register);
 router.get("/direct-income", authMiddleware, IncomeController.getDirectIncome);
 router.get("/level-income", authMiddleware, IncomeController.getLevelIncome);
 router.get("/Roi-income", authMiddleware, IncomeController.getRoiIncome);
+
 
 
 // Mount the router on /api/auth so that /register becomes /api/auth/register
