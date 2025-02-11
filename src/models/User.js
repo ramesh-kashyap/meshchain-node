@@ -1,92 +1,46 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database"); // ✅ Import the Sequelize instance
-const env = require("../config/env");
+const db = require("../config/db");
+const bcrypt = require("bcryptjs");
 
-const User = sequelize.define("User", {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+const User = {
+  // ✅ Create a new user
+  create: async (userData) => {
+    userData.password = await bcrypt.hash(userData.password, 10); // Hash password
+    const [result] = await db.query("INSERT INTO users SET ?", [userData]);
+    return result.insertId;
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  sponsor: {
-    type: DataTypes.INTEGER, // Foreign Key Reference
-    allowNull: true,
-  },
-  ParentId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  position: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  active_status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-  jdate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  level: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  tpassword: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  adate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  PSR: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  TPSR: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  country_iso: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  dialCode: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  vip: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-}, {
-  timestamps: true, // Automatically adds createdAt & updatedAt
-  tableName: "users",
-});
 
-// Relationship (Foreign Key)
-User.belongsTo(User, { as: "sponsor_detail", foreignKey: "sponsor" });
+  // ✅ Get user by ID
+  findById: async (id) => {
+    const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [id]);
+    return rows[0];
+  },
+
+  // ✅ Get user by username
+  findByUsername: async (username) => {
+    const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
+    return rows[0];
+  },
+
+  // ✅ Verify user credentials (Login)
+  login: async (username, password) => {
+    const user = await User.findByUsername(username);
+    if (!user) return null;
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    return isMatch ? user : null;
+  },
+
+  // ✅ Update user details
+  update: async (id, userData) => {
+    await db.query("UPDATE users SET ? WHERE id = ?", [userData, id]);
+    return true;
+  },
+
+  // ✅ Delete user
+  delete: async (id) => {
+    await db.query("DELETE FROM users WHERE id = ?", [id]);
+    return true;
+  }
+};
 
 module.exports = User;

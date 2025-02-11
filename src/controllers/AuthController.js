@@ -1,8 +1,14 @@
 const db = require("../config/connectDB");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
+const bodyParser = require("body-parser");
+const express = require("express");
+const cors = require("cors");
 
-
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
 // Register User Function
 const register = async (req, res) => {
     console.log(req.body);
@@ -127,7 +133,150 @@ const logout = async (req, res) => {
     }
 };
 
+
+const sendCode = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiryTime = new Date(Date.now() + 10 * 60000); // 10-minute expiry
+
+        console.log("Received Email:", email);
+        console.log("Generated Code:", code);
+        console.log("Code Expiry Time:", expiryTime);
+
+        // ✅ Check if user exists
+        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+
+        if (users.length === 0) {
+            console.log("Email Not Found:", email);
+            return res.status(404).json({ message: 'Email not found' });
+        }
+
+        console.log("User Found:", users);
+
+        // ✅ Update verification code in database
+        await db.query('UPDATE users SET verification_code = ?, code_expires_at = ? WHERE email = ?', [code, expiryTime, email]);
+        console.log("Verification code updated in database");
+
+        // ✅ Setup nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        console.log("Nodemailer transporter configured");
+
+        // ✅ Email options
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Your Password Reset Code',
+            text: `Your verification code is ${code}. This code will expire in 10 minutes.`
+        };
+
+        // ✅ Send email
+        await transporter.sendMail(mailOptions);
+        console.log("Verification email sent successfully to:", email);
+
+        return res.json({ message: 'Verification code sent successfully' });
+
+    } catch (error) {
+        console.error("Error in sendCode function:", error.message);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// ✅ Verify Code & Reset Password
+const resetPassword = async (req, res) => {
+    try {
+        const { email, code, password } = req.body;
+        console.log("Received Request for Reset Password");
+        console.log("Email:", email);
+        console.log("Verification Code:", code);
+
+        // ✅ Step 1: Check if the code is valid and not expired
+        const [users] = await db.query(
+            'SELECT * FROM users WHERE email = ? AND verification_code = ? AND code_expires_at > NOW()', 
+            [email, code]
+        );
+
+        if (users.length === 0) {
+            console.log("Invalid or expired verification code for:", email);
+            return res.status(400).json({ message: 'Invalid or expired code' });
+        }
+
+        console.log("User Found:", users[0].email);
+
+        // ✅ Step 2: Update the password and reset the verification code
+        await db.query(
+            'UPDATE users SET password = ?, verification_code = NULL, code_expires_at = NULL WHERE email = ?', 
+            [password, email]
+        );
+
+        console.log("Password updated successfully for:", email);
+
+        return res.json({ message: 'Password updated successfully' });
+
+    } catch (error) {
+        console.error("Error in resetPassword function:", error.message);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// ✅ Get User Profile
+const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.userId; // ✅ User ID from JWT Token
+        console.log("sagar",userId);
+
+        const [rows] = await db.query("SELECT id, name, email FROM users WHERE id = ?", [userId]);
+
+        if (!rows.length) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(rows[0]); // ✅ Return user data
+    } catch (error) {
+        console.error("Error fetching user:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// ✅ Update User Name
+const updateUserProfile = async (req, res) => {
+    try {
+        console.log("Request User:", req.user); // 🔥 Debugging ke liye
+
+        if (!req.user || !req.user.userId) {  // ✅ Fix yahan hai
+            return res.status(400).json({ error: "User not authenticated" });
+        }
+
+        const userId = req.user.userId;  // ✅ Correct field name use karein
+        const { name } = req.body;
+
+        console.log("User ID:", userId);  // ✅ Check karein ki ID sahi aa rahi hai
+        
+        const [result] = await db.query("UPDATE users SET name = ? WHERE id = ?", [name, userId]);
+        console.log("Update result:", result);  
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "User not found or no changes made" });
+        }
+
+        res.json({ message: "Profile updated successfully", name });
+    } catch (error) {
+        console.error("Error updating user:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
 // module.exports = { logout };
 
-module.exports = { login, register, logout };
+module.exports = { login, register, logout, sendCode, resetPassword, updateUserProfile,getUserProfile};
 
