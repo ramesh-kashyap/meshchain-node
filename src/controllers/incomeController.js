@@ -1,19 +1,23 @@
 
 const db = require("../config/connectDB");
+const Income = require("../models/Income");
+
+
+
 
 exports.getDirectIncome = async (req, res) => {
   try {
-      console.log("Fetching all income data"); // ✅ Debugging
+    console.log("Fetching all income data"); // ✅ Debugging
 
-      // Fetch all income data from the incomes table
-      const [income] = await db.execute("SELECT * FROM incomes");
+    // Fetch all income data using Sequelize
+    const income = await Income.findAll();
 
-      console.log("All Income Data:", income); // ✅ Debugging database result
+    console.log("All Income Data:", income); // ✅ Debugging database result
 
-      return res.status(200).json({ success: true, data: income });
+    return res.status(200).json({ success: true, data: income });
   } catch (error) {
-      console.error("Error fetching incomes:", error.message);
-      return res.status(500).json({ error: "Server error", details: error.message });
+    console.error("Error fetching incomes:", error.message);
+    return res.status(500).json({ error: "Server error", details: error.message });
   }
 };
 
