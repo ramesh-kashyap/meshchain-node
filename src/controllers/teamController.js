@@ -180,10 +180,54 @@ const getTeam = async (req, res) => {
 };
 
 
-// // src/middlewares/authMiddleware.js
-// module.exports = (req, res, next) => {
-//     console.log("Auth Middleware Triggered");
-//     next(); // Move to the next middleware/controller
-// };
 
-module.exports = { getTeam };
+const list = async (req, res) => {
+    try {
+        const {token} = req.body;
+        if (!token || typeof token !== "string") {
+            return res.status(200).json({ error: "Unauthorized: Invalid token" });
+        }
+          console.log(token);
+
+        // Remove "Bearer " prefix if present
+        if (token.startsWith("Bearer ")) {
+            token = token.slice(7, token.length);
+        }
+        const secretKey = process.env.JWT_SECRET || "default_secret_key"; // Use environment variable or fallback
+
+        const decoded = jwt.verify(token, secretKey); // Verify token
+        const userId = decoded.userId;
+
+        if (!userId || !userId) {
+            return res.status(200).json({ error: "Unauthorized: User not found" });
+        }
+        // const user = req.user;
+        const ids = await myLevelTeam(userId);
+
+        let whereCondition = {};
+
+        if (genTeam.length > 0) {
+            whereCondition.id = { [Op.in]: genTeam };
+        } else {
+            whereCondition.id = null;
+        }
+
+        const notes = await User.findAll({
+            where: whereCondition,
+            order: [['id', 'DESC']]
+        });
+
+        return res.json({
+            direct_team: notes
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
+
+
+module.exports = { getTeam ,list};
