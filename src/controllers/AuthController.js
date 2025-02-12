@@ -1,6 +1,8 @@
 const db = require("../config/connectDB");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // User Model Import Karein
+
 
 
 // Register User Function
