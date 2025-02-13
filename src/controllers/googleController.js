@@ -8,6 +8,15 @@ require('dotenv').config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const generateUsername = () => {
+    const rand1 = Math.floor(Math.random() * 100); // Equivalent to `rand()` in PHP (last 2 digits)
+    const timestamp = String(Date.now()).slice(-3); // Last 3 digits of `time()`
+    const rand2 = Math.floor(Math.random() * 100); // Equivalent to `mt_rand()` in PHP (last 2 digits)
+
+    return `${rand1}${timestamp}${rand2}`;
+};
+
+
 async function verifyGoogleToken(req, res) {
   try {
       const { token } = req.body;
