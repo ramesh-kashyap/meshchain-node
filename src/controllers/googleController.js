@@ -27,6 +27,7 @@ async function verifyGoogleToken(req, res) {
       // Extract user details from Google payload
     //   console.log(payload.sub);
       
+    
       const googleId = payload.sub;
       const email = payload.email;
       const name = payload.name || '';
