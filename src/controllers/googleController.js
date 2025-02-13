@@ -15,7 +15,7 @@ async function verifyGoogleToken(req, res) {
         throw new Error("Invalid token: Expected a non-empty string");
       }
   
-      // Verify Google token
+      
       const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.GOOGLE_CLIENT_ID,

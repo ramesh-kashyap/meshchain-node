@@ -15,7 +15,7 @@
 //       const [income] = await db.execute(
 //           "SELECT * FROM incomes WHERE user_id = ? AND remarks = 'Direct Income'", 
 //           [userId]
-//       );
+//       );     
 
 //       console.log("Income Data:", income); // ✅ Debugging database result
 

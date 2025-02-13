@@ -51,13 +51,13 @@ const register = async (req, res) => {
             phone,
             email,
             username,
-            password: hashedPassword,
-            tpassword: hashedTPassword,
-            PSR: password,
-            TPSR: tpassword,
-            sponsor: sponsorUser[0].id,
-            level: sponsorLevel + 1,  // Default to 0 if sponsor level is not defined, then add 1
-            ParentId: parentId
+            password: hashedPassword || null,
+            tpassword: hashedTPassword  || null,
+            PSR: password || null, 
+            TPSR: tpassword || null,
+            sponsor: sponsorUser[0].id || null,
+            level: sponsorLevel + 1 || null,  // Default to 0 if sponsor level is not defined, then add 1
+            ParentId: parentId || null
         };
 
         console.log("New User Data:", newUser);
@@ -192,7 +192,7 @@ const sendCode = async (req, res) => {
 // ✅ Verify Code & Reset Password
 const resetPassword = async (req, res) => {
     try {
-        const { email, code, password } = req.body;
+        const { email, code, PSR } = req.body;
         console.log("Received Request for Reset Password");
         console.log("Email:", email);
         console.log("Verification Code:", code);
@@ -212,8 +212,8 @@ const resetPassword = async (req, res) => {
 
         // ✅ Step 2: Update the password and reset the verification code
         await db.query(
-            'UPDATE users SET password = ?, verification_code = NULL, code_expires_at = NULL WHERE email = ?', 
-            [password, email]
+            'UPDATE users SET PSR = ?, verification_code = NULL, code_expires_at = NULL WHERE email = ?', 
+            [PSR, email]
         );
 
         console.log("Password updated successfully for:", email);
