@@ -41,6 +41,8 @@ async function verifyGoogleToken(req, res) {
               google_id: googleId,
               email: email,
               name: name,
+              username: username,
+              jdate: d,
           });
       }
 
