@@ -199,46 +199,5 @@ const loginWithTelegram = async (req, res) => {
 };
 
 
-
-
-module.exports = { login, register, logout,loginWithTelegram };
-
-const loginWithTelegram = async (req, res) => {
-    try {
-        const { telegram_id, tusername, tname, tlastname } = req.body;
-
-        if (!telegram_id) {
-            return res.status(400).json({ message: "Telegram ID is required" });
-        }
-
-        // Check if user exists
-        const [user] = await db.execute("SELECT * FROM telegram_users WHERE telegram_id = ?", [telegram_id]);
-
-        if (user.length > 0) {
-            // User exists, generate JWT token
-            const token = jwt.sign({ id: user[0].id, telegram_id: user[0].telegram_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-            return res.status(200).json({ message: "Login successful",telegram_id:telegram_id, token });
-        } else {
-            // Create new user
-            const [newUser] = await db.execute(
-                "INSERT INTO telegram_users (telegram_id, tusername, tname, tlastname) VALUES (?, ?, ?, ?)",
-                [telegram_id, tusername, tname, tlastname]
-            );
-
-            // Generate JWT token
-            const token = jwt.sign({ id: newUser.insertId, telegram_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-            return res.status(201).json({ message: "Account created and logged in", telegram_id:telegram_id  , token });
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ message: "Internal Server SSS" });
-    }
-};
-
-
-
-
 module.exports = { login, register, logout,loginWithTelegram };
 

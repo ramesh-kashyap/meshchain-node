@@ -2,7 +2,6 @@ const express = require('express');
 let router = express.Router();
 const AuthController = require("../controllers/AuthController");
 const IncomeController = require("../controllers/incomeController");
-const TelegramController = require("../controllers/TelegramController");
 
 const authMiddleware = require("../middleware/authMiddleware"); // JWT Auth Middleware
 
@@ -29,32 +28,7 @@ router.post('/list',  teamController.list);
 
 // Mount the router on /api/auth so that /register becomes /api/auth/register
 const initWebRouter = (app) => {
-    // page account
-    router.post("/register", AuthController.register);
-    router.post("/login", AuthController.login);
-    router.post("/logout", AuthController.logout);
-
-    // telegram api
-    router.post('/telegram-login', AuthController.loginWithTelegram);
-    router.post('/telegram-user-detail', TelegramController.getUserByTelegramId);
-
-
-    return app.use('/', router); 
-}
-module.exports = {
-    initWebRouter,
-};
     app.use('/api/auth', router);
   };
 
   module.exports = initWebRouter;
-    // page account
-    router.post("/register", AuthController.register);
-    router.post("/login", AuthController.login);
-    router.post("/logout", AuthController.logout);
-
-    // telegram api
-    router.post('/telegram-login', AuthController.loginWithTelegram);
-    router.post('/telegram-user-detail', TelegramController.getUserByTelegramId);
-
-

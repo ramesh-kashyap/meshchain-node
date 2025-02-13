@@ -1,18 +1,5 @@
 require('dotenv').config();
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const mysql = require('mysql2/promise');
-const winston = require('winston');
 const routes = require('./routes/web');
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import mysql from 'mysql2/promise';
-import winston from 'winston';
-
 require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
@@ -26,7 +13,6 @@ const initWebRouter = require("./routes/web");
 
 // Initialize Express App
 const app = express();
-const PORT = process.env.PORT || 3001;
 const PORT = process.env.PORT || 3002;
 
 // Security Middleware
@@ -45,9 +31,7 @@ app.use(express.json());
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP' });
 // app.use(limiter);
-// Rate Limiter
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: "Too many requests from this IP" });
-app.use(limiter);
+
 
 // Logger Configuration
 const logger = winston.createLogger({
