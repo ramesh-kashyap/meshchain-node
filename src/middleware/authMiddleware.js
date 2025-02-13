@@ -9,8 +9,11 @@ const authMiddleware = async (req, res, next) => {
         }
 
 
+
         // Token Verify Karna
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+       
         
         // User Fetch Karna
         const user = await User.findByPk(decoded.id);

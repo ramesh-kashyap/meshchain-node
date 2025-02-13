@@ -1,4 +1,5 @@
-const db = require("../config/connectDB");
+const sequelize = require('../config/connectDB'); // Import Sequelize connection
+const { QueryTypes } = require('sequelize');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User"); // User Model Import Karein
@@ -18,6 +19,7 @@ const register = async (req, res) => {
         const [existingUser] = await db.execute(
             "SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]
         );
+        
         if (existingUser.length > 0) {
             return res.status(400).json({ error: "Email or Phone already exists!" });
         }
@@ -130,7 +132,72 @@ const logout = async (req, res) => {
     }
 };
 
-// module.exports = { logout };
 
-module.exports = { login, register, logout };
+const loginWithTelegram = async (req, res) => {
+    try {
+        const { telegram_id, tusername, tname, tlastname } = req.body;
+
+        console.log("🔹 Telegram ID:", telegram_id);
+
+        if (!telegram_id) {
+            return res.status(200).json({ message: "Telegram ID is required" });
+        }
+
+        // ✅ Check if user exists
+        const queryCheckUser = `
+            SELECT * FROM telegram_users WHERE telegram_id = :telegram_id
+        `;
+
+        const users = await sequelize.query(queryCheckUser, {
+            replacements: { telegram_id },
+            type: QueryTypes.SELECT,
+        });
+        if (users.length > 0) {
+            // ✅ User exists, generate JWT token
+            const user = users[0]; // Extract first user
+
+            const token = jwt.sign(
+                { id: user.id, telegram_id: user.telegram_id },
+                process.env.JWT_SECRET,
+                { expiresIn: "1h" }
+            );
+
+            return res.status(200).json({
+                message: "Login successful",
+                telegram_id: telegram_id,
+                token,
+            });
+        } else {
+            // ✅ Create new user
+            const queryInsertUser = `
+                INSERT INTO telegram_users (telegram_id, tusername, tname, tlastname) 
+                VALUES (:telegram_id, :tusername, :tname, :tlastname)
+            `;
+
+            const [insertResult] = await sequelize.query(queryInsertUser, {
+                replacements: { telegram_id, tusername, tname, tlastname },
+                type: QueryTypes.INSERT,
+            });
+
+            // ✅ Generate JWT token for new user
+            const token = jwt.sign(
+                { id: insertResult, telegram_id }, // insertResult contains the new user ID
+                process.env.JWT_SECRET,
+                { expiresIn: "1h" }
+            );
+
+            return res.status(201).json({
+                message: "Account created and logged in",
+                telegram_id: telegram_id,
+                token,
+            });
+        }
+    } catch (error) {
+        console.error("❌ Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+module.exports = { login, register, logout,loginWithTelegram };
 

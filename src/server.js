@@ -1,3 +1,5 @@
+require('dotenv').config();
+const routes = require('./routes/web');
 require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
@@ -15,12 +17,21 @@ const PORT = process.env.PORT || 3002;
 
 // Security Middleware
 app.use(helmet());
+app.use(cors({
+    origin: "https://17ed-2405-201-5802-909b-5512-fc3d-9b90-957b.ngrok-free.app", // Adjust as needed
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
+
+app.use(express.json());
+
+// Apply CORS middleware for Express
 app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(",") || "*", credentials: true }));
 app.use(express.json());
 
-// Rate Limiter
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: "Too many requests from this IP" });
-app.use(limiter);
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP' });
+// app.use(limiter);
+
 
 // Logger Configuration
 const logger = winston.createLogger({

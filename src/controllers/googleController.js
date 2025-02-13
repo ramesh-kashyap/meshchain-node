@@ -63,5 +63,3 @@ async function verifyGoogleToken(req, res) {
 
 module.exports = { verifyGoogleToken };
   
-
-module.exports = { verifyGoogleToken };
