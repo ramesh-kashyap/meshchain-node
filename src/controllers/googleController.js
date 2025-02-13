@@ -25,13 +25,16 @@ async function verifyGoogleToken(req, res) {
       const payload = ticket.getPayload();
 
       // Extract user details from Google payload
+    //   console.log(payload.sub);
+      
       const googleId = payload.sub;
       const email = payload.email;
       const name = payload.name || '';
 
       // Find or create the user in the database
       let user = await User.findOne({ where: { google_id: googleId } });
-
+      var d = new Date();
+      const username = generateUsername();
       if (!user) {
           user = await User.create({
               google_id: googleId,
@@ -41,6 +44,7 @@ async function verifyGoogleToken(req, res) {
       }
 
       // Generate JWT token
+    //   console.log(user);
       const jwtToken = jwt.sign(
           {
               userId: user.id,
