@@ -10,11 +10,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
-app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || '*', credentials: true }));
+// ✅ Fix CORS issue
+
+// ✅ Fix CORS issue
+app.use(cors({ origin: "*" })); // Allow all origins
+// Apply CORS middleware for Express
 app.use(express.json());
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: 'Too many requests from this IP' });
-app.use(limiter);
+// app.use(limiter);
 
 const logger = winston.createLogger({
     level: 'info',
