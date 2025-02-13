@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const AuthController = require("../controllers/AuthController");
 const IncomeController = require("../controllers/incomeController");
+const TelegramController = require("../controllers/TelegramController");
 
 const authMiddleware = require("../middleware/authMiddleware"); // JWT Auth Middleware
 
@@ -23,6 +24,12 @@ router.post('/list',  teamController.list);
 
 
 
+
+
+
+// telegram api 
+router.post('/telegram-login', AuthController.loginWithTelegram);
+router.post('/telegram-user-detail', TelegramController.getUserByTelegramId);
 
 
 
