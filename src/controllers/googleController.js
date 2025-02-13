@@ -8,6 +8,14 @@ require('dotenv').config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const generateUsername = () => {
+    const rand1 = Math.floor(Math.random() * 100); // Equivalent to `rand()` in PHP (last 2 digits)
+    const timestamp = String(Date.now()).slice(-3); // Last 3 digits of `time()`
+    const rand2 = Math.floor(Math.random() * 100); // Equivalent to `mt_rand()` in PHP (last 2 digits)
+
+    return `${rand1}${timestamp}${rand2}`;
+};
+
 async function verifyGoogleToken(req, res) {
   try {
       const { token } = req.body;
@@ -31,12 +39,16 @@ async function verifyGoogleToken(req, res) {
 
       // Find or create the user in the database
       let user = await User.findOne({ where: { google_id: googleId } });
+      var d = new Date();
+      const username = generateUsername();
 
       if (!user) {
           user = await User.create({
               google_id: googleId,
               email: email,
               name: name,
+              jdate:d,
+              username:username,
           });
       }
 
@@ -62,4 +74,3 @@ async function verifyGoogleToken(req, res) {
 }
 
 module.exports = { verifyGoogleToken };
-  
