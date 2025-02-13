@@ -1,13 +1,19 @@
 const jwt = require("jsonwebtoken");
-const authMiddleware = (req, res, next) => {
-  const token = req.headers["authorization"]; // Or wherever your token is sent
+const User = require("../models/User");
 
-  if (!token) {
-    return res.status(403).json({ success: false, message: "No token provided." });
-  }
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1]; // "Bearer TOKEN"
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized: Token missing" });
+        }
+
+
 
         // Token Verify Karna
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+       
         
         // User Fetch Karna
         const user = await User.findByPk(decoded.id);
