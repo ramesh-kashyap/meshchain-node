@@ -53,4 +53,6 @@ const User = sequelize.define('User', {
     timestamps: false, // Enable createdAt and updatedAt fields
 });
 
+
+
 module.exports = User;
