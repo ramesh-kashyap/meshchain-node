@@ -57,6 +57,7 @@ async function verifyGoogleToken(req, res) {
           process.env.JWT_SECRET,
           { expiresIn: '1h' }
       );
+      
 
       console.log('JWT Token generated:', jwtToken);
 
