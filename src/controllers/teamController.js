@@ -181,48 +181,75 @@ const getTeam = async (req, res) => {
 
 
 
-const list = async (req, res) => {
+const listUsers = async (req, res) => {
     try {
-        const {token} = req.body;
-        if (!token || typeof token !== "string") {
-            return res.status(200).json({ error: "Unauthorized: Invalid token" });
-        }
-          console.log(token);
+       
+        const user = req.body; // 🔹 Get authenticated user (Assuming JWT middleware is used)
 
-        // Remove "Bearer " prefix if present
-        if (token.startsWith("Bearer ")) {
-            token = token.slice(7, token.length);
-        }
-        const secretKey = process.env.JWT_SECRET || "default_secret_key"; // Use environment variable or fallback
+        console.log(user);
 
-        const decoded = jwt.verify(token, secretKey); // Verify token
-        const userId = decoded.userId;
+        return false;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 6;
+        const selectedLevel = req.query.selected_level ? parseInt(req.query.selected_level) : 0;
+        const search = req.query.search || null;
 
-        if (!userId || !userId) {
-            return res.status(200).json({ error: "Unauthorized: User not found" });
-        }
-        // const user = req.user;
-        const ids = await myLevelTeam(userId);
+        // 🔹 Fetch user's level team
+        const myLevelTeam = await myLevelTeamCount2(user.id);
 
-        let whereCondition = {};
-
-        if (genTeam.length > 0) {
-            whereCondition.id = { [Op.in]: genTeam };
+        let genTeam = {};
+        if (selectedLevel > 0) {
+            genTeam = myLevelTeam[selectedLevel] || [];
         } else {
-            whereCondition.id = null;
+            genTeam = myLevelTeam;
         }
 
-        const notes = await User.findAll({
+        // 🔹 Query to get users
+        let whereCondition = {
+            [Op.or]: [],
+        };
+
+        if (Object.keys(genTeam).length > 0) {
+            Object.values(genTeam).forEach((value) => {
+                if (Array.isArray(value)) {
+                    whereCondition[Op.or].push({ id: { [Op.in]: value } });
+                } else {
+                    whereCondition[Op.or].push({ id: value });
+                }
+            });
+        } else {
+            whereCondition = { id: null };
+        }
+
+        // 🔹 Add search filter if applicable
+        if (search && req.query.reset !== "Reset") {
+            whereCondition[Op.or].push(
+                { name: { [Op.like]: `%${search}%` } },
+                { username: { [Op.like]: `%${search}%` } },
+                { email: { [Op.like]: `%${search}%` } },
+                { phone: { [Op.like]: `%${search}%` } },
+                { jdate: { [Op.like]: `%${search}%` } },
+                { active_status: { [Op.like]: `%${search}%` } }
+            );
+        }
+
+        // 🔹 Fetch data with pagination
+        const { count, rows } = await User.findAndCountAll({
             where: whereCondition,
-            order: [['id', 'DESC']]
+            order: [["id", "DESC"]],
+            limit: limit,
+            offset: req.query.page ? (parseInt(req.query.page) - 1) * limit : 0,
         });
 
-        return res.json({
-            direct_team: notes
+        return res.status(200).json({
+            direct_team: rows,
+            search: search,
+            page: req.query.page || 1,
+            total: count,
+            limit: limit,
         });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        console.error("❌ Error fetching user list:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
@@ -230,4 +257,5 @@ const list = async (req, res) => {
 
 
 
-module.exports = { getTeam ,list};
+
+module.exports = { getTeam ,listUsers};

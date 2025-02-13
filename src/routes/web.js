@@ -20,7 +20,7 @@ router.get("/direct-income", authMiddleware, IncomeController.getDirectIncome);
 router.get("/level-income", authMiddleware, IncomeController.getLevelIncome);
 router.get("/Roi-income", authMiddleware, IncomeController.getRoiIncome);
 router.post("/team",teamController.getTeam);
-router.post('/list',  teamController.list);
+router.get('/list', authMiddleware, teamController.listUsers);
 
 
 
